@@ -1,0 +1,110 @@
+---
+title: "Cyclistic Bikeshare Case Study"
+author: "Randall Brown"
+date: "2022-08-22"
+output: html_document
+---
+
+## The Question
+
+I have been tasked with finding the similarities and differences between members and casual customers and how they use the Cyclistic Bikeshare service.
+
+## The Data
+
+The data used in this analysis has been provided to me by the company through a secure link that contains all of the company's ride information. Any information shared in this analysis should be considered private.
+
+First, the tidyverse must be installed and loaded.
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+Then the data must be loaded.
+
+```{r}
+trip_data <- read_csv("2022_07_bikeshare_data.csv")
+glimpse(trip_data)
+top_ten_starts <- trip_data %>%
+  filter(grepl('Streeter Dr & Grand Ave|DuSable Lake Shore Dr & North Blvd|Michigan Ave & Oak St|DuSable Lake Shore Dr & Monroe St|Theater on the Lake|Millennium Park|Wells St & Concord Ln|Clark St & Elm St|Wells St & Elm St|Clark St & Armitage Ave', start_station_name))
+top_ten_ends <- trip_data %>%
+  filter(grepl('Streeter Dr & Grand Ave|DuSable Lake Shore Dr & North Blvd|Michigan Ave & Oak St|DuSable Lake Shore Dr & Monroe St|Theater on the Lake|Millennium Park|Wells St & Concord Ln|Clark St & Elm St|Clark St & Lincoln Ave|Clark St & Armitage Ave', end_station_name))
+```
+
+## Cleaning Process
+
+The data you see in this analysis has been cleaned. Originally, the data contained numerous blank cells that needed to be removed in order to get valid answers. I cleaned the data by going through a few steps:
+*I downloaded the raw data and saved it locally on my hard drive.
+*I used Excel to filter and remove all of the rows containing blank cells.
+*I used SQL to filter the data quickly and show me important subsets of the data.
+
+I have documented my steps in Excel, SQL, and R in order to provide any information that may be needed, some of which will be provided here.
+
+```{r}
+sql_starts <- read_csv("top_ten_starts.csv")
+view(sql_starts)
+sql_ends <- read_csv("top_ten_ends.csv")
+view(sql_ends)
+```
+
+## Analysis
+
+I have decided to sort the data by date and compare casual riders to members on 5 criteria; ride length, bike type, days, starting stations, and ending stations.
+
+### Plots
+
+This first plot shows the relationship between riders and their preferred bike types. Members are roughly 50-50, while casual riders lean more toward electric bikes.
+
+```{r}
+ggplot(trip_data) +
+  geom_bar(aes(x=member_casual, fill=rideable_type)) +
+  labs(title="Members vs. Casual Riders",
+       subtitle="Type of Bikes Used by Customers",
+       fill="Bike Type") +
+  xlab("Customer Type")
+```
+
+This plot shows customer riding habits by day. (1=Sunday, 2=Monday, and so on.) The graph shows an increase in casual riders on Saturdays and Sundays, and fairly consistent member riders throughout the week.
+
+```{r}
+ggplot(trip_data) +
+  geom_bar(aes(x=day_of_week, fill=member_casual)) +
+  labs(title="Customers by Day of Week",
+       subtitle="The Amount of Customers on Each Day",
+       fill="Customer Type") +
+  xlab("Day of Week")
+```
+
+Now it's important to show the most popular starting points.
+
+```{r}
+ggplot(top_ten_starts) +
+  geom_bar(aes(x=start_station_name, fill=member_casual)) +
+  labs(title="Top Ten Start Stations",
+       subtitle="Casual vs. Member Top Ten Ride Starts") +
+  xlab("Start Station") +
+  theme(axis.text.x=element_text(angle=60)) +
+  theme(axis.text.x=element_text(vjust=1)) +
+  theme(axis.text.x=element_text(hjust=1),
+        axis.title.x=element_text(vjust=10))
+```
+
+It's also important to show the most popular ending points.
+
+```{r}
+ggplot(top_ten_ends) +
+  geom_bar(aes(x=end_station_name, fill=member_casual)) +
+  labs(title="Top Ten End Stations",
+       subtitle="Casual vs. Member Top Ten Ride Ends") +
+  xlab("End Station") +
+  theme(axis.text.x=element_text(angle=60)) +
+  theme(axis.text.x=element_text(vjust=1)) +
+  theme(axis.text.x=element_text(hjust=1),
+        axis.title.x=element_text(vjust=10))
+```
+
+## Recommendations
+
+Based on my analysis, it is my recommendation that Cyclistic Bikeshare focus on converting casual customers that start their rides at the Streeter Drive & Grand Avenue location (highest customer base for starts and finishes), as well as the other top 9 starting and ending locations. Weekends would be the best time to campaign in those locations in order to reach the highest percentage of casual riders. Cyclistic should also continue to invest in roughly the an equal amount of both electric bikes and classic bikes as the customer base is almost split 50-50.
+
+If I had more information about membership prices and members' average income, I could be more detailed in who might be most likely to convert from a casual rider to a member.
